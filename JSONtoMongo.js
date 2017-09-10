@@ -7,20 +7,30 @@ var fs = require('fs'),
     mongoose = require('mongoose'), 
     Schema = mongoose.Schema, 
     Listing = require('./ListingSchema.js'), 
-    config = require('./config'),
-    ;
+    config = require('./config');
 
 
-var listingSchema = new Schema({
-  /* your code here */
-  code: {type: String, required: true},
-  name: {type: String, required: true},
-  coordinates: { latitude: Number, longitude: Number },
-  address: String
-});
+              // var listingSchema = new Schema({
+              //   /* your code here */
+              //   code: {type: String, required: true},
+              //   name: {type: String, required: true},
+              //   coordinates: { latitude: Number, longitude: Number },
+              //   address: String
+              // });
+              // {
+              //     "code": "AAF", 
+              //     "name": "Academic Advisement - Farrior Hall", 
+              //     "coordinates": {
+              //         "latitude": 29.6502323, 
+              //         "longitude": -82.34563860000002
+              //     }, 
+              //     "address": "100 Fletcher Dr, Gainesville, FL 32611, United States"
+              // }
 
 /* Connect to your database */
-mongoose.connect(db.uri);
+// mongoose.createConnection(config.db.uri);
+mongoose.connect(config.db.uri, { useMongoClient: true });
+
 /* 
   Instantiate a mongoose model for each listing object in the JSON file, 
   and then save it to your Mongo database 
@@ -36,22 +46,21 @@ fs.readFile('listings.json', 'utf8', function(err, data) {
    if (err){
     throw err;
    }
+   
+   listingsData = JSON.parse(data).entries;
 
-   listingData = data.entries;
+   listingsData.forEach(function(entry){
+      new Listing({
+        code: entry.code,
+        name: entry.name,
+        coordinates: entry.coordinates,
+        address: entry.address
+      }).save();
+   })
+    
 });
 
-for(i=0; i<listingsData.length;i++){
 
-  var newListing = Listing({
-    code: listingsData[i].code,
-    name: listingsData[i].name,
-    coordinates: { latitude: listingsData[i].coordinates.latitude,
-      longitude: listingsData[i].coordinates.longitude },
-    address: listingsData[i].address
-  });
-
-
-}
 
 
 
